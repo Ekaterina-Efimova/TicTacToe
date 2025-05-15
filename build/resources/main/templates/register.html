@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация и Вход</title>
+    <script>
+        function register(event) {
+            event.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            fetch('/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+                .then(response => {
+                    if (response.status === 201) {
+                        window.location.href = '/game/new';
+                    } else {
+                        alert('Ошибка регистрации');
+                    }
+                });
+        }
+    </script>
+</head>
+
+<body>
+<h2>Регистрация</h2>
+<form onsubmit="register(event)">
+    <input type="text" id="register-username" placeholder="Имя пользователя" required>
+    <input type="password" id="register-password" placeholder="Пароль" required>
+    <button type="submit">Зарегистрироваться</button>
+</form>
+<p th:text="${message}"></p>
+</body>
+
+</html>

@@ -1,0 +1,378 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Tic Tac Toe API Tests",
+		"description": "Тесты для API игры в Крестики-нолики",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Регистрация пользователя",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус код 201 - пользователь успешно зарегистрирован\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"// Сохраняем имя пользователя и пароль для последующих запросов",
+							"pm.environment.set(\"username\", pm.request.body.raw ? JSON.parse(pm.request.body.raw).username : \"\");",
+							"pm.environment.set(\"password\", pm.request.body.raw ? JSON.parse(pm.request.body.raw).password : \"\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"testuser{{$timestamp}}\",\n    \"password\": \"password123\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/register",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"register"
+					]
+				},
+				"description": "Регистрация нового пользователя в системе"
+			},
+			"response": []
+		},
+		{
+			"name": "Авторизация пользователя",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус код 200 - успешная авторизация\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Ответ содержит UUID пользователя\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('uuid');",
+							"    pm.expect(jsonData.uuid).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);",
+							"    ",
+							"    // Сохраняем UUID пользователя для последующих запросов",
+							"    pm.environment.set(\"userUuid\", jsonData.uuid);",
+							"});",
+							"",
+							"// Сохраняем заголовок авторизации для последующих запросов",
+							"pm.environment.set(\"authHeader\", pm.request.headers.get(\"Authorization\"));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Создаем заголовок Basic Auth",
+							"var username = pm.environment.get(\"username\");",
+							"var password = pm.environment.get(\"password\");",
+							"",
+							"if (username && password) {",
+							"    var authString = username + \":\" + password;",
+							"    var encodedAuth = btoa(authString);",
+							"    pm.request.headers.add({",
+							"        key: \"Authorization\",",
+							"        value: \"Basic \" + encodedAuth",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/auth/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				},
+				"description": "Авторизация пользователя в системе"
+			},
+			"response": []
+		},
+		{
+			"name": "Создание новой игры",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус код 200 - игра успешно создана\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Ответ содержит ID игры и статус активности\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('gameId');",
+							"    pm.expect(jsonData).to.have.property('isGameActive');",
+							"    pm.expect(jsonData.isGameActive).to.be.true;",
+							"    ",
+							"    // Сохраняем ID игры для последующих запросов",
+							"    pm.environment.set(\"gameId\", jsonData.gameId);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authHeader}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/game/new?isSinglePlayer=true",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"game",
+						"new"
+					],
+					"query": [
+						{
+							"key": "isSinglePlayer",
+							"value": "true"
+						}
+					]
+				},
+				"description": "Создание новой игры"
+			},
+			"response": []
+		},
+		{
+			"name": "Сделать ход в игре",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус код 200 - ход успешно сделан\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Ответ содержит информацию об игре\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('game');",
+							"    pm.expect(jsonData.game).to.have.property('gameId');",
+							"    pm.expect(jsonData.game).to.have.property('isGameActive');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authHeader}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"move\": \"X\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/game/{{gameId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"game",
+						"{{gameId}}"
+					]
+				},
+				"description": "Сделать ход в игре"
+			},
+			"response": []
+		},
+		{
+			"name": "Ошибка авторизации",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус код 401 - неверные учетные данные\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic aW52YWxpZHVzZXI6aW52YWxpZHBhc3N3b3Jk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/auth/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				},
+				"description": "Проверка ошибки авторизации с неверными учетными данными"
+			},
+			"response": []
+		},
+		{
+			"name": "Ошибка регистрации (дублирование пользователя)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус код 400 - ошибка регистрации пользователя\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"password123\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/register",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"register"
+					]
+				},
+				"description": "Попытка повторной регистрации существующего пользователя"
+			},
+			"response": []
+		},
+		{
+			"name": "Ошибка доступа к игре",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус код 404 - игра не найдена\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authHeader}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"move\": \"X\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/game/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"game",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				},
+				"description": "Попытка доступа к несуществующей игре"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

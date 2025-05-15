@@ -1,0 +1,109 @@
+openapi: 3.0.0
+info:
+  title: Tic Tac Toe API
+  description: API для игры в Крестики-нолики с поддержкой авторизации пользователей.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /auth/register:
+    post:
+      summary: Регистрация нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+        '400':
+          description: Ошибка регистрации пользователя
+  /auth/login:
+    post:
+      summary: Авторизация пользователя
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: "dXNlcjEyMzpwYXNzd29yZDEyMw=="
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uuid:
+                    type: string
+                    example: "123e4567-e89b-12d3-a456-426614174000"
+        '401':
+          description: Неверные учетные данные
+  /game/new:
+    post:
+      summary: Создание новой игры
+      responses:
+        '200':
+          description: Игра успешно создана
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gameId:
+                    type: string
+                    example: "123e4567-e89b-12d3-a456-426614174001"
+                  isGameActive:
+                    type: boolean
+                    example: true
+  /game/{gameId}:
+    post:
+      summary: Сделать ход в игре
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          description: ID игры
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                move:
+                  type: string
+                  example: "X"
+      responses:
+        '200':
+          description: Ход успешно сделан
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  game:
+                    type: object
+                    properties:
+                      gameId:
+                        type: string
+                        example: "123e4567-e89b-12d3-a456-426614174001"
+                      isGameActive:
+                        type: boolean
+                        example: true
+        '404':
+          description: Игра не найдена

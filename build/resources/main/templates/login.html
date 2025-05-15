@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация и Вход</title>
+    <script>
+        function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const authHeader = 'Basic ' + btoa(username + ':' + password);
+            
+            fetch('/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Authorization': authHeader
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Сохраняем токен в localStorage
+                    localStorage.setItem('authHeader', authHeader);
+                    
+                    // Создаем GET-запрос к странице игры с заголовком авторизации
+                    fetch('/game/new', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': authHeader
+                        }
+                    })
+                    .then(response => {
+                        // После успешного ответа перенаправляем на страницу игры
+                        window.location.href = '/game/new';
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при загрузке страницы игры:', error);
+                        alert('Ошибка при загрузке страницы игры');
+                    });
+                } else {
+                    alert('Ошибка входа');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при входе:', error);
+                alert('Ошибка при входе');
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <h2>Вход</h2>
+    <form onsubmit="login(event)">
+        <input type="text" id="login-username" placeholder="Имя пользователя" required>
+        <input type="password" id="login-password" placeholder="Пароль" required>
+        <button type="submit">Войти</button>
+    </form>
+    <p th:text="${message}"></p>
+</body>
+
+</html>
