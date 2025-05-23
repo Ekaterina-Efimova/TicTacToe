@@ -1,7 +1,7 @@
 package exercise.exercise.domain.utility;
 
 import exercise.exercise.consts.Consts;
-import exercise.exercise.domain.model.other.RoleEnum;
+import exercise.exercise.consts.RoleEnum;
 import exercise.exercise.domain.model.Game;
 
 import java.util.UUID;

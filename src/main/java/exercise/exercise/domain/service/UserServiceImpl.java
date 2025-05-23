@@ -12,11 +12,13 @@ import java.util.UUID;
 
 /**
  * Реализация сервиса для управления пользователями.
- * Предоставляет методы для регистрации, аутентификации и получения пользователей.
+ * Предоставляет методы для регистрации, аутентификации и получения
+ * пользователей.
  */
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+
     /**
      * Конструктор, инициализирующий сервис с использованием UserRepository.
      *
@@ -25,6 +27,7 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
     /**
      * Регистрирует нового пользователя.
      *
@@ -39,35 +42,45 @@ public class UserServiceImpl implements UserService {
         }
         return result;
     }
+
     /**
      * Аутентифицирует пользователя по логину и паролю.
      *
-     * @param login логин пользователя
+     * @param login    логин пользователя
      * @param password пароль пользователя
-     * @return объект Optional, содержащий пользователя, если аутентификация прошла успешно, иначе пустой объект
+     * @return объект Optional, содержащий пользователя, если аутентификация прошла
+     *         успешно, иначе пустой объект
      */
     public Optional<User> authenticate(String login, String password) {
-        return getUserByLogin(login);
+        Optional<User> user = getUserByLogin(login);
+        if (user.isEmpty() || !userRepository.getPasswordEncoder().matches(password, user.get().getPassword()))
+            throw new SecurityException("Invalid credentials");
+        return user;
     }
+
     /**
      * Получает пользователя по уникальному идентификатору.
      *
      * @param uuid уникальный идентификатор пользователя
-     * @return объект Optional, содержащий пользователя, если он найден, иначе пустой объект
+     * @return объект Optional, содержащий пользователя, если он найден, иначе
+     *         пустой объект
      */
     public Optional<User> getUserByUUID(UUID uuid) {
         return Optional.of(UserMapperData.INSTANCE.fromData(userRepository.getUserByUUID(uuid)));
     }
+
     /**
      * Получает пользователя по логину.
      *
      * @param login логин пользователя
-     * @return объект Optional, содержащий пользователя, если он найден, иначе пустой объект
+     * @return объект Optional, содержащий пользователя, если он найден, иначе
+     *         пустой объект
      */
     @Override
     public Optional<User> getUserByLogin(String login) {
         return userRepository.getUserByLogin(login).map(UserMapperData.INSTANCE::fromData);
     }
+
     /**
      * Авторизует пользователя на основе заголовка авторизации.
      *
@@ -82,6 +95,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new SecurityException("Invalid credentials"))
                 .getId();
     }
+
     /**
      * Извлекает учетные данные из заголовка авторизации.
      *
@@ -97,7 +111,7 @@ public class UserServiceImpl implements UserService {
         int colonIndex = credentials.indexOf(':');
         if (colonIndex == -1)
             throw new IllegalArgumentException("Invalid credentials format");
-        return new String[]{credentials.substring(0, colonIndex),
-                credentials.substring(colonIndex + 1)};
+        return new String[] { credentials.substring(0, colonIndex),
+                credentials.substring(colonIndex + 1) };
     }
 }

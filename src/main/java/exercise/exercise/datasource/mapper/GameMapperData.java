@@ -26,8 +26,6 @@ public interface GameMapperData {
      */
     @Mapping(target = "authHeader", ignore = true)
     @Mapping(target = "state", ignore = true)
-    @Mapping(target = "move", ignore = true)
-    @Mapping(target = "winner", ignore = true)
     Game fromData(GameEntity gameEntity);
     /**
      * Преобразует объект игры (Game) в сущность игры (GameEntity).

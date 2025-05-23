@@ -33,7 +33,7 @@ public class Consts {
     /**
      * Путь для получения всех игр.
      */
-    public static final String ALL_GAME_PATH = "/allGames";
+    public static final String ALL_GAME_PATH = "/all";
     /**
      * Путь для получения доступных игр.
      */

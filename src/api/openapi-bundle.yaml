@@ -1,76 +1,71 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.0.3",
   "info": {
-    "title": "Tic Tac Toe API",
-    "description": "API для игры в Крестики-нолики с поддержкой авторизации пользователей.",
+    "title": "Tic-Tac-Toe Game API",
+    "description": "API для игры в крестики-нолики с возможностью регистрации, авторизации и многопользовательской игры",
     "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "http://localhost:8080"
+      "url": "https://localhost:8080",
+      "description": "Локальный сервер разработки"
     }
   ],
   "paths": {
     "/auth/register": {
       "post": {
         "summary": "Регистрация нового пользователя",
+        "description": "Создает новую учетную запись пользователя",
+        "tags": [
+          "Аутентификация"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "username": {
-                    "type": "string",
-                    "example": "user123"
-                  },
-                  "password": {
-                    "type": "string",
-                    "example": "password123"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Пользователь успешно зарегистрирован"
-          },
-          "400": {
-            "description": "Ошибка регистрации пользователя"
-          }
-        }
-      }
-    },
-    "/auth/login": {
-      "post": {
-        "summary": "Авторизация пользователя",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "text/plain": {
-              "schema": {
-                "type": "string",
-                "example": "dXNlcjEyMzpwYXNzd29yZDEyMw=="
+                "$ref": "#/components/schemas/SignUpRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Успешная авторизация",
+            "description": "Пользователь успешно зарегистрирован"
+          },
+          "400": {
+            "description": "Ошибка при регистрации (например, пользователь уже существует)"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Вход пользователя в систему",
+        "description": "Аутентифицирует пользователя и возвращает его UUID",
+        "tags": [
+          "Аутентификация"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Базовая аутентификация в формате \"Basic base64(username:password)\"",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешная аутентификация",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "uuid": {
-                      "type": "string",
-                      "example": "123e4567-e89b-12d3-a456-426614174000"
-                    }
-                  }
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "UUID пользователя"
                 }
               }
             }
@@ -84,42 +79,106 @@
     "/game/new": {
       "post": {
         "summary": "Создание новой игры",
+        "description": "Создает новую игру (одиночную или многопользовательскую)",
+        "tags": [
+          "Игра"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Базовая аутентификация в формате \"Basic base64(username:password)\"",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isSinglePlayer",
+            "in": "query",
+            "required": true,
+            "description": "Флаг, указывающий, является ли игра одиночной",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
-          "200": {
+          "201": {
             "description": "Игра успешно создана",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "gameId": {
-                      "type": "string",
-                      "example": "123e4567-e89b-12d3-a456-426614174001"
-                    },
-                    "isGameActive": {
-                      "type": "boolean",
-                      "example": true
-                    }
-                  }
+                  "$ref": "#/components/schemas/GameWeb"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Ошибка при создании игры"
           }
         }
       }
     },
     "/game/{gameId}": {
-      "post": {
-        "summary": "Сделать ход в игре",
+      "get": {
+        "summary": "Получение информации об игре",
+        "description": "Возвращает текущее состояние игры по её идентификатору",
+        "tags": [
+          "Игра"
+        ],
         "parameters": [
           {
             "name": "gameId",
             "in": "path",
             "required": true,
-            "description": "ID игры",
+            "description": "Уникальный идентификатор игры",
             "schema": {
               "type": "string",
-              "example": "123e4567-e89b-12d3-a456-426614174001"
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Информация об игре успешно получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameWeb"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Игра не найдена"
+          }
+        }
+      },
+      "post": {
+        "summary": "Выполнение хода в игре",
+        "description": "Обрабатывает следующий ход в игре",
+        "tags": [
+          "Игра"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "description": "Уникальный идентификатор игры",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Базовая аутентификация в формате \"Basic base64(username:password)\"",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -128,45 +187,276 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "move": {
-                    "type": "string",
-                    "example": "X"
-                  }
-                }
+                "$ref": "#/components/schemas/GameWeb"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Ход успешно сделан",
+            "description": "Ход успешно выполнен",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "game": {
-                      "type": "object",
-                      "properties": {
-                        "gameId": {
-                          "type": "string",
-                          "example": "123e4567-e89b-12d3-a456-426614174001"
-                        },
-                        "isGameActive": {
-                          "type": "boolean",
-                          "example": true
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/GameWeb"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверный ход"
+          },
+          "403": {
+            "description": "Нет прав для выполнения хода"
+          },
+          "409": {
+            "description": "Конфликт состояния игры"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Присоединение к игре",
+        "description": "Позволяет второму игроку присоединиться к существующей игре",
+        "tags": [
+          "Игра"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "description": "Уникальный идентификатор игры",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Базовая аутентификация в формате \"Basic base64(username:password)\"",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешное присоединение к игре",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameWeb"
                 }
               }
             }
           },
           "404": {
             "description": "Игра не найдена"
+          }
+        }
+      }
+    },
+    "/game/user/{uuid}": {
+      "get": {
+        "summary": "Получение информации о пользователе",
+        "description": "Возвращает информацию о пользователе по его UUID",
+        "tags": [
+          "Пользователи"
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "description": "Уникальный идентификатор пользователя",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Информация о пользователе успешно получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWeb"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Пользователь не найден"
+          }
+        }
+      }
+    },
+    "/game/all": {
+      "get": {
+        "summary": "Получение списка всех игр",
+        "description": "Возвращает список идентификаторов всех игр",
+        "tags": [
+          "Игра"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Базовая аутентификация в формате \"Basic base64(username:password)\"",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список игр успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/available": {
+      "get": {
+        "summary": "Получение списка доступных игр",
+        "description": "Возвращает список идентификаторов доступных для присоединения игр",
+        "tags": [
+          "Игра"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Базовая аутентификация в формате \"Basic base64(username:password)\"",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список доступных игр успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SignUpRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Имя пользователя (логин)"
+          },
+          "password": {
+            "type": "string",
+            "description": "Пароль пользователя",
+            "format": "password"
+          }
+        }
+      },
+      "UserWeb": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Уникальный идентификатор пользователя"
+          },
+          "username": {
+            "type": "string",
+            "description": "Имя пользователя (логин)"
+          },
+          "password": {
+            "type": "string",
+            "description": "Пароль пользователя (хешированный)",
+            "format": "password"
+          }
+        }
+      },
+      "GameWeb": {
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Уникальный идентификатор игры"
+          },
+          "board": {
+            "type": "array",
+            "description": "Игровое поле 3x3",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "description": "Значение ячейки (0 - пусто, 1 - X, 2 - O)"
+              }
+            }
+          },
+          "currentPlayer": {
+            "type": "integer",
+            "description": "Индекс текущего игрока (1 или 2)"
+          },
+          "player1": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID первого игрока"
+          },
+          "player2": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID второго игрока (может быть null для одиночной игры)"
+          },
+          "singlePlayer": {
+            "type": "boolean",
+            "description": "Флаг, указывающий, является ли игра одиночной"
+          },
+          "gameOver": {
+            "type": "boolean",
+            "description": "Флаг, указывающий, завершена ли игра"
+          },
+          "winner": {
+            "type": "integer",
+            "description": "Индекс победителя (0 - ничья, 1 - первый игрок, 2 - второй игрок)"
+          },
+          "authHeader": {
+            "type": "string",
+            "description": "Заголовок авторизации (используется только для запросов)"
           }
         }
       }

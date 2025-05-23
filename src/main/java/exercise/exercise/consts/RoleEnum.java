@@ -1,4 +1,4 @@
-package exercise.exercise.domain.model.other;
+package exercise.exercise.consts;
 
 /**
  * Перечисление, представляющее роли игроков в игре.

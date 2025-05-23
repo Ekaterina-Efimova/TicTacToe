@@ -11,7 +11,6 @@ import lombok.Setter;
 public class Game {
     private UUID gameId; // Уникальный идентификатор игры
     private TicTacToeBoard board; // Доска игры
-    private String move; // Текущий ход
     private String authHeader; // Заголовок авторизации
     private boolean gameOver; // Флаг, указывающий, завершена ли игра
     private boolean singlePlayer; // Флаг, указывающий, является ли игра одиночной
@@ -19,7 +18,6 @@ public class Game {
     private UUID player1; // Идентификатор первого игрока
     private UUID player2; // Идентификатор второго игрока
     private UUID currentPlayer; // Идентификатор текущего игрока
-    private UUID winner; // Идентификатор победителя
 
     /**
      * Конструктор по умолчанию.
@@ -44,17 +42,8 @@ public class Game {
      * @param board  доска игры
      * @param move   текущий ход
      */
-    public Game(UUID gameId, TicTacToeBoard board, String move) {
+    public Game(UUID gameId, TicTacToeBoard board) {
         this.gameId = gameId;
         this.board = board;
-        this.move = move;
-    }
-    /**
-     * Устанавливает текущий ход.
-     *
-     * @param move текущий ход
-     */
-    public void setMove(String move) {
-        this.move = move;
     }
 }

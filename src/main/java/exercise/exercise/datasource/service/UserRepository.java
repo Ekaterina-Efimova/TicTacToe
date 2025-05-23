@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.Getter;
 
 /**
  * Репозиторий для управления сущностями пользователей.
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Repository
 public class UserRepository {
     private final UserCrudRepository userCrudRepository;
+    @Getter
     private final PasswordEncoder passwordEncoder;
     /**
      * Конструктор, инициализирующий репозиторий с использованием UserCrudRepository

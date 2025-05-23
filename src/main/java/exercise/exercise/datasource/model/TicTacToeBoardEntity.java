@@ -1,7 +1,7 @@
 package exercise.exercise.datasource.model;
 
 import exercise.exercise.consts.Consts;
-import exercise.exercise.domain.model.other.RoleEnum;
+import exercise.exercise.consts.RoleEnum;
 
 import lombok.Getter;
 

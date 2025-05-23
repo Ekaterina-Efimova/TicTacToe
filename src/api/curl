@@ -1,48 +1,48 @@
 регистрация (user/123 user1/123)
-curl -X POST "http://localhost:8080/auth/register" -H "Content-Type: application/json" -d '{"username":"user1", "password":"123"}'
-curl -X POST "http://localhost:8080/auth/register" -H "Content-Type: application/json" -d '{"username":"user", "password":"123"}'
+curl -X POST "https://localhost:8080/auth/register" -H "Content-Type: application/json" -d '{"username":"user1", "password":"123"}'
+curl -X POST "https://localhost:8080/auth/register" -H "Content-Type: application/json" -d '{"username":"user", "password":"123"}'
 
 залогиниться (user/123)
-curl -X POST http://localhost:8080/auth/login -H "Authorization: Basic dXNlcjoxMjM="
+curl -X POST https://localhost:8080/auth/login -H "Authorization: Basic dXNlcjoxMjM="
 
 создать новую одиночную игру
-curl -X POST   http://localhost:8080/game/new   -H "Authorization: Basic dXNlcjoxMjM="   -d "isSinglePlayer=true"
+curl -X POST   https://localhost:8080/game/new   -H "Authorization: Basic dXNlcjoxMjM="   -d "isSinglePlayer=true"
 
 создать новую игру
-curl -X POST   http://localhost:8080/game/new   -H "Authorization: Basic dXNlcjoxMjM="   -d "isSinglePlayer=false"
+curl -X POST   https://localhost:8080/game/new   -H "Authorization: Basic dXNlcjoxMjM="   -d "isSinglePlayer=false"
 
 Все игры
-curl -X GET "http://localhost:8080/game/allGames" -H "Authorization: Basic dXNlcjoxMjM="
+curl -X GET "httpss://localhost:8080/game/allGames" -H "Authorization: Basic dXNlcjoxMjM="
 
 Информация о пользователе
-curl -X GET "http://localhost:8080/game/user/27fa039e-0a71-48b1-a3fb-1a7ddd7dac96" -u user:123
+curl -X GET "https://localhost:8080/game/user/27fa039e-0a71-48b1-a3fb-1a7ddd7dac96" -u user:123
 
 НАДО МЕНЯТЬ ID GAME И ID ИГРОКА, ДОБАВЛЯТЬ ХОД (В ТОМ ЧИСЛЕ КОМПЬЮТЕРА)
 присоединиться к игре (user1/123)
-curl -X PATCH http://localhost:8080/game/3d56633d-dd3e-4f14-851a-eda1ea2cb3d3 -H "Authorization: Basic dXNlcjE6MTIz"
+curl -X PATCH https://localhost:8080/game/508fefa3-4897-4f5c-a2c2-25586fd72073 -H "Authorization: Basic dXNlcjE6MTIz"
 
 получить игру
-curl -X GET   http://localhost:8080/game/359e52f9-dfab-43ea-9d3a-3f9a78518d5b  -H "Authorization: Basic dXNlcjoxMjM="
+curl -X GET   https://localhost:8080/game/359e52f9-dfab-43ea-9d3a-3f9a78518d5b  -H "Authorization: Basic dXNlcjoxMjM="
 
 получить доступные
-curl -X GET "http://localhost:8080/game/available" -H "Authorization: Basic dXNlcjE6MTIz"
+curl -X GET "https://localhost:8080/game/available" -H "Authorization: Basic dXNlcjE6MTIz"
 
 сделать ход
 curl -X POST \
-  http://localhost:8080/game/012d19dd-3b7c-4811-920d-c11202f8d97b\
+  https://localhost:8080/game/508fefa3-4897-4f5c-a2c2-25586fd72073\
   -H "Authorization: Basic dXNlcjE6MTIz" \
   -H "Content-Type: application/json" \
-  -d '{"info":"X(1) - step player 1, O(2) - step player 2", "board": [[2,1,2],[0,1,0],[0,1,0]], "singlePlayer": false, "player1": "27fa039e-0a71-48b1-a3fb-1a7ddd7dac96", "player2": "97327a7e-2460-48cc-a112-a9603ad7382f", "currentPlayer": "27fa039e-0a71-48b1-a3fb-1a7ddd7dac96"}'
+  -d '{"info":"X(1) - step player 1, O(2) - step player 2", "board": [[0,2,1],[0,1,0],[0,0,0]], "singlePlayer": false, "player1": "27fa039e-0a71-48b1-a3fb-1a7ddd7dac96", "player2": "97327a7e-2460-48cc-a112-a9603ad7382f", "currentPlayer": "27fa039e-0a71-48b1-a3fb-1a7ddd7dac96"}'
 
 curl -X POST \
-  http://localhost:8080/game/012d19dd-3b7c-4811-920d-c11202f8d97b\
+  https://localhost:8080/game/508fefa3-4897-4f5c-a2c2-25586fd72073\
   -H "Authorization: Basic dXNlcjoxMjM=" \
   -H "Content-Type: application/json" \
-  -d '{"info":"X(1) - step player 1, O(2) - step player 2", "board": [[2,1,2],[0,1,0],[0,0,0]], "singlePlayer": false, "player1": "27fa039e-0a71-48b1-a3fb-1a7ddd7dac96", "player2": "97327a7e-2460-48cc-a112-a9603ad7382f", "currentPlayer": "97327a7e-2460-48cc-a112-a9603ad7382f"}'
+  -d '{"info":"X(1) - step player 1, O(2) - step player 2", "board": [[0,2,0],[0,1,0],[0,0,0]], "singlePlayer": false, "player1": "27fa039e-0a71-48b1-a3fb-1a7ddd7dac96", "player2": "97327a7e-2460-48cc-a112-a9603ad7382f", "currentPlayer": "97327a7e-2460-48cc-a112-a9603ad7382f"}'
 
 
 curl -X POST \
-  http://localhost:8080/game/359e52f9-dfab-43ea-9d3a-3f9a78518d5b\
+  https://localhost:8080/game/359e52f9-dfab-43ea-9d3a-3f9a78518d5b\
   -H "Authorization: Basic dXNlcjoxMjM=" \
   -H "Content-Type: application/json" \
   -d '{"info":"X(1) - step player 1, O(2) - step player 2", "board": [[1,1,2],[1,2,0],[0,0,0]], "singlePlayer": true, "player1": "97327a7e-2460-48cc-a112-a9603ad7382f", "player2": "00000000-0000-0000-0000-000000000000", "currentPlayer": "97327a7e-2460-48cc-a112-a9603ad7382f"}'

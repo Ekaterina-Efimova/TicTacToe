@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 /**
  * Репозиторий для управления сущностями игры.
@@ -49,8 +48,8 @@ public class GameRepository {
      */
     public List<UUID> getAllGames() {
         return StreamSupport.stream(gameCrudRepository.findAll().spliterator(), false)
-                .map(game -> UUID.fromString(game.getGameId().toString()))
-                .collect(Collectors.toList());
+                .map(game -> UUID.fromString(game.getGameId()))
+                .toList();
     }
     /**
      * Получает список доступных игр для данного игрока по его уникальному идентификатору.
@@ -63,7 +62,7 @@ public class GameRepository {
                 .filter(game -> (game.getPlayer1() != null ^ game.getPlayer2() != null))
                 .filter(game -> (game.getPlayer1() != null && !game.getPlayer1().equals(uuid))
                         || (game.getPlayer2() != null && !game.getPlayer2().equals(uuid)))
-                .map(game -> UUID.fromString(game.getGameId().toString()))
-                .collect(Collectors.toList());
+                .map(game -> UUID.fromString(game.getGameId()))
+                .toList();
     }
 }

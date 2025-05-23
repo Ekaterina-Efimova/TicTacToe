@@ -43,7 +43,6 @@ public interface GameMapperWeb {
    */
   @InheritInverseConfiguration
   @Mapping(target = "gameOver", ignore = true)
-  @Mapping(target = "winner", ignore = true)
   @Mapping(target = "board", source = "board")
   Game fromWeb(GameWeb gameWeb);
   /**
